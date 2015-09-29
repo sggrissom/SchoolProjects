@@ -5,6 +5,14 @@
    $Creator: Steven Grissom $
    ======================================================================== */
 
+#define A 1
+#define B 0
+#define C 0
+#define D 0
+
+#define DataPointCount 1000
+#define Thresh 0.0001
+
 #include <time.h>
 #include <iostream>
 #include <fstream>
@@ -93,83 +101,83 @@ s32 main()
 #if INTERNAL
     srand(0);
 #else
-    srand(time(0));
+    srand((u32)time(0));
 #endif
     
-#if 1
+#if A
     const char *filename = "../data/nn1a.csv";
     
-    r32 data[1000][2];
-    r32 TestData[1000][2];
+    r32 data[DataPointCount][2];
+    r32 TestData[DataPointCount][2];
     
     for(u32 i = 0;
         i < ArrayCount(data);
         ++i)
     {
-        data[i][0] = RandomBetween(-2,10);
+        data[i][0] = RandomBetween(-1,7);
         data[i][1] = FunctionProblemOne(data[i][0]);
         
-        TestData[i][0] = RandomBetween(-2,10);
+        TestData[i][0] = RandomBetween(-1,7);
         TestData[i][1] = FunctionProblemOne(data[i][0]);
     }
 
     u32 numLayers = 3;
     u32 lSz[3] = {1,25,1};
 #endif
-#if 0
+#if B
     const char *filename = "../data/nn2a.csv";
 
-    r32 data[300][3];
-    r32 TestData[300][3];
+    r32 data[DataPointCount][3];
+    r32 TestData[DataPointCount][3];
     
     for(u32 i = 0;
         i < ArrayCount(data);
         ++i)
     {
-        data[i][0] = RandomBetween(-5,5);
-        data[i][1] = RandomBetween(-5,5);
+        data[i][0] = RandomBetween(-3,3);
+        data[i][1] = RandomBetween(-3,3);
         data[i][2] = FunctionProblemTwo(data[i][0], data[i][1]);
         
-        TestData[i][0] = RandomBetween(-5,5);
-        TestData[i][1] = RandomBetween(-5,5);
+        TestData[i][0] = RandomBetween(-3,3);
+        TestData[i][1] = RandomBetween(-3,3);
         TestData[i][2] = FunctionProblemTwo(data[i][0], data[i][1]);
     }
 
-    u32 numLayers = 5;
-    u32 lSz[5] = {2,5,5,5,1};
+    u32 numLayers = 4;
+    u32 lSz[4] = {2,25,10,1};
 #endif
-#if 0
+#if C
     const char *filename = "../data/nn1b.csv";
     
-    r32 data[100][2];
-    r32 TestData[100][2];
+    r32 data[DataPointCount][2];
+    r32 TestData[DataPointCount][2];
     
     for(u32 i = 0;
         i < ArrayCount(data);
         ++i)
     {
-        data[i][0] = RandomBetween(-2,10);
+        data[i][0] = RandomBetween(-1,7);
         data[i][1] = FunctionProblemOneWithNoise(data[i][0]);
         
-        TestData[i][0] = RandomBetween(-2,10);
+        TestData[i][0] = RandomBetween(-1,7);
         TestData[i][1] = FunctionProblemOneWithNoise(data[i][0]);
     }
 
-    u32 numLayers = 4;
-    u32 lSz[4] = {1,3,3,1};
+    u32 numLayers = 3;
+    u32 lSz[3] = {1,25,1};
 #endif
-#if 0
+#if D
     const char *filename = "../data/nn2b.csv";
         
-    r32 data[300][3];
-    r32 TestData[300][3];
+    r32 data[DataPointCount][3];
+    r32 TestData[DataPointCount][3];
     
     for(u32 i = 0;
         i < ArrayCount(data);
         ++i)
     {
-        data[i][0] = RandomBetween(-5,5);
-        data[i][1] = RandomBetween(-5,5);
+        data[i][0] = RandomBetween(-3,3);
+        data[i][1] = RandomBetween(-3,3);
         data[i][2] = FunctionProblemTwoWithNoise(data[i][0], data[i][1]);
         
         TestData[i][0] = RandomBetween(-5,5);
@@ -178,18 +186,17 @@ s32 main()
     }
 
     u32 numLayers = 4;
-    u32 lSz[4] = {2,3,3,1};
+    u32 lSz[4] = {2,25,10,1};
 #endif
 
     Assert(numLayers == ArrayCount(lSz));
 	
-	r32 beta = 0.3f, alpha = 0.1f, Thresh =  0.00025f;
+	r32 beta = 0.3f, alpha = 0.1f;
 	u32 num_iter = 50000;
 
 	CBackProp *bp = new CBackProp(numLayers, lSz, beta, alpha);
 
     u32 DataPointSize = lSz[0] + lSz[numLayers - 1];
-    u32 DataPointCount = ArrayCount(data);
 
     for (u32 IterationIndex = 0;
          IterationIndex < num_iter;
@@ -221,8 +228,6 @@ s32 main()
 #if 1
     std::ofstream ofs;
     ofs.open (filename, std::ofstream::out);
-
-    ofs << "neural network\n\n";
 
 	for (u32 i = 0 ; i < DataPointCount ; i++ )
 	{

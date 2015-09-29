@@ -105,11 +105,11 @@ sg_atoi(const char *s)
 #include <stdlib.h>
     
 internal void *
-sg_grow_buffer(void *Array, s32 SizeIncrease, u32 ItemSize)
+sg_grow_buffer(void *Array, u32 SizeIncrease, u32 ItemSize)
 {
     void *Result = 0;
     
-    s32 DoubleCurrentSize = Array ? 2*buffer_size(Array) : 0;
+    u32 DoubleCurrentSize = Array ? 2*buffer_size(Array) : 0;
     u32 MinimumNewSize = buffer_count(Array) + SizeIncrease;
     u32 NewSize = DoubleCurrentSize > MinimumNewSize ? DoubleCurrentSize : MinimumNewSize;
     u32 *p = (u32 *) realloc(Array ? buffer_raw(Array) : 0, ItemSize*NewSize + sizeof(u32)*2);
