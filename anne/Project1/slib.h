@@ -4,6 +4,8 @@
    $Date: $
    $Revision: $
    $Creator: Steven Grissom $
+
+   My personal library file with custom type names, macros, and functions
    ======================================================================== */
 
 #ifdef __cplusplus

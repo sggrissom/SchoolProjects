@@ -1,10 +1,6 @@
 #if !defined(NN_H)
-/* ========================================================================
-   $File: $
-   $Date: $
-   $Revision: $
-   $Creator: Steven Grissom $
-   ======================================================================== */
+//base on the implementation retrieved from
+//http://www.codeproject.com/Articles/13582/Back-propagation-Neural-Net
 
 #include <math.h>
 
@@ -76,7 +72,6 @@ CBackProp::CBackProp(u32 nl,u32 *sz,r32 b,r32 a):beta(b),alpha(a)
 		}
 	}
 
-	srand((unsigned)(time(NULL)));
 	for(u32 i=1;i<numl;i++)
 		for(u32 j=0;j<lsize[i];j++)
 			for(u32 k=0;k<lsize[i-1]+1;k++)
