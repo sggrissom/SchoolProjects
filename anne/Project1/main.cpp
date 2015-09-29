@@ -97,10 +97,10 @@ s32 main()
 #endif
     
 #if 1
-    const char *filename = "nn1a.csv";
+    const char *filename = "../data/nn1a.csv";
     
-    r32 data[100][2];
-    r32 TestData[100][2];
+    r32 data[1000][2];
+    r32 TestData[1000][2];
     
     for(u32 i = 0;
         i < ArrayCount(data);
@@ -113,11 +113,11 @@ s32 main()
         TestData[i][1] = FunctionProblemOne(data[i][0]);
     }
 
-    u32 numLayers = 5;
-    u32 lSz[5] = {1,5,5,5,1};
+    u32 numLayers = 3;
+    u32 lSz[3] = {1,25,1};
 #endif
 #if 0
-    const char *filename = "nn2a.csv";
+    const char *filename = "../data/nn2a.csv";
 
     r32 data[300][3];
     r32 TestData[300][3];
@@ -139,7 +139,7 @@ s32 main()
     u32 lSz[5] = {2,5,5,5,1};
 #endif
 #if 0
-    const char *filename = "nn1b.csv";
+    const char *filename = "../data/nn1b.csv";
     
     r32 data[100][2];
     r32 TestData[100][2];
@@ -159,7 +159,7 @@ s32 main()
     u32 lSz[4] = {1,3,3,1};
 #endif
 #if 0
-    const char *filename = "nn2b.csv";
+    const char *filename = "../data/nn2b.csv";
         
     r32 data[300][3];
     r32 TestData[300][3];
@@ -183,17 +183,39 @@ s32 main()
 
     Assert(numLayers == ArrayCount(lSz));
 	
-	r32 beta = 0.3f, alpha = 0.1f, Thresh =  0.0001f;
-	u32 num_iter = 5000000;
+	r32 beta = 0.3f, alpha = 0.1f, Thresh =  0.00025f;
+	u32 num_iter = 50000;
 
 	CBackProp *bp = new CBackProp(numLayers, lSz, beta, alpha);
 
     u32 DataPointSize = lSz[0] + lSz[numLayers - 1];
     u32 DataPointCount = ArrayCount(data);
-	
-	for (u32 i=0; i<num_iter ; i++)
+
+    for (u32 IterationIndex = 0;
+         IterationIndex < num_iter;
+         ++IterationIndex)
 	{
-		bp->bpgt(data[i%DataPointCount], &data[i%DataPointCount][lSz[0]]);
+        r32 MeanSquareError = 0;
+	
+        for(u32 DataPointIndex = 0;
+            DataPointIndex < DataPointCount;
+            ++DataPointIndex)
+        {
+            r32 *target = &data[DataPointIndex][lSz[0]];
+            bp->bpgt(data[DataPointIndex], target);
+            MeanSquareError += bp->mse(target);
+        }
+        
+        MeanSquareError /= DataPointCount;
+        if(MeanSquareError < Thresh)
+        {
+            printf("network trained, MSE: %f\n", MeanSquareError);
+            break;
+        }
+        else
+        {
+            printf("training... MSE: %f\n", MeanSquareError);
+        }
 	}
 
 #if 1
@@ -202,26 +224,14 @@ s32 main()
 
     ofs << "neural network\n\n";
 
-    r32 ErrorSum = 0;
-
 	for (u32 i = 0 ; i < DataPointCount ; i++ )
 	{
-        r32 *DataPoint = TestData[i];
+        r32 *DataPoint = data[i];
 		bp->ffwd(DataPoint);
         r32 output = DataPoint[lSz[0]];
         r32 prediction = bp->Out(0);
         r32 unNormalized = (prediction * 10) - 5;
 
-        r32 ErrorDelta = output - prediction;
-        ErrorSum += ErrorDelta;
-        
-        r32 epsilon = 0.02f;
-        if(ErrorDelta > epsilon || ErrorDelta < -epsilon)
-        {
-            
-        } else
-        {
-        }
         for(u32 InputIndex = 0;
             InputIndex < lSz[0];
             ++InputIndex)
@@ -231,11 +241,6 @@ s32 main()
         ofs << unNormalized << std::endl;
 	}
 #endif
-
-    r32 ErrorMean = ErrorSum / DataPointCount;
-
-    printf("error: %f\n", ErrorMean);
-    ofs << "\n\n" << ErrorMean << "\n";
 
     ofs.close();
     
