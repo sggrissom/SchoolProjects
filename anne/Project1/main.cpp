@@ -5,13 +5,15 @@
    $Creator: Steven Grissom $
    ======================================================================== */
 
-#define A 1
+//A and B are function 1 and 2 without noise, respectively
+//C and D are with noise
+#define A 0
 #define B 0
 #define C 0
-#define D 0
+#define D 1
 
 #define DataPointCount 1000
-#define Thresh 0.0001
+#define Thresh 0.0005
 
 #include <time.h>
 #include <iostream>
@@ -20,6 +22,7 @@
 #include "slib.h"
 #include "nn.h"
 
+//macro to get a random float between two values
 #define RandomBetween(min,max) (min + (r32)(rand() / ((r32)(RAND_MAX/(max - min)))))
 
 internal r32
@@ -88,116 +91,109 @@ FunctionProblemTwoWithNoise(r32 x, r32 y)
     return (Result+5)/10;
 }
 
-internal r32
-TestFunction2XOR(u32 x, u32 y)
-{
-    r32 Result = (r32)(x ^ y);
-
-    return Result;
-}
-
 s32 main()
 {
-#if INTERNAL
-    srand(0);
-#else
     srand((u32)time(0));
-#endif
-    
+
+    //setup data depending on which function will be run
+    //TrainData will contain random values for teaching the network
+    //TestData is for testing the network after it's trained
 #if A
-    const char *filename = "../data/nn1a.csv";
+    const char *filename = "nn1a.csv";
     
-    r32 data[DataPointCount][2];
+    r32 TrainData[DataPointCount][2];
     r32 TestData[DataPointCount][2];
     
     for(u32 i = 0;
-        i < ArrayCount(data);
+        i < ArrayCount(TrainData);
         ++i)
     {
-        data[i][0] = RandomBetween(-1,7);
-        data[i][1] = FunctionProblemOne(data[i][0]);
+        TrainData[i][0] = RandomBetween(-1,7);
+        TrainData[i][1] = FunctionProblemOne(TrainData[i][0]);
         
         TestData[i][0] = RandomBetween(-1,7);
-        TestData[i][1] = FunctionProblemOne(data[i][0]);
+        TestData[i][1] = FunctionProblemOne(TrainData[i][0]);
     }
 
     u32 numLayers = 3;
     u32 lSz[3] = {1,25,1};
 #endif
 #if B
-    const char *filename = "../data/nn2a.csv";
+    const char *filename = "nn2a.csv";
 
-    r32 data[DataPointCount][3];
+    r32 TrainData[DataPointCount][3];
     r32 TestData[DataPointCount][3];
     
     for(u32 i = 0;
-        i < ArrayCount(data);
+        i < ArrayCount(TrainData);
         ++i)
     {
-        data[i][0] = RandomBetween(-3,3);
-        data[i][1] = RandomBetween(-3,3);
-        data[i][2] = FunctionProblemTwo(data[i][0], data[i][1]);
+        TrainData[i][0] = RandomBetween(-3,3);
+        TrainData[i][1] = RandomBetween(-3,3);
+        TrainData[i][2] = FunctionProblemTwo(TrainData[i][0], TrainData[i][1]);
         
         TestData[i][0] = RandomBetween(-3,3);
         TestData[i][1] = RandomBetween(-3,3);
-        TestData[i][2] = FunctionProblemTwo(data[i][0], data[i][1]);
+        TestData[i][2] = FunctionProblemTwo(TrainData[i][0], TrainData[i][1]);
     }
 
     u32 numLayers = 4;
     u32 lSz[4] = {2,25,10,1};
 #endif
 #if C
-    const char *filename = "../data/nn1b.csv";
+    const char *filename = "nn1b.csv";
     
-    r32 data[DataPointCount][2];
+    r32 TrainData[DataPointCount][2];
     r32 TestData[DataPointCount][2];
     
     for(u32 i = 0;
-        i < ArrayCount(data);
+        i < ArrayCount(TrainData);
         ++i)
     {
-        data[i][0] = RandomBetween(-1,7);
-        data[i][1] = FunctionProblemOneWithNoise(data[i][0]);
+        TrainData[i][0] = RandomBetween(-1,7);
+        TrainData[i][1] = FunctionProblemOneWithNoise(TrainData[i][0]);
         
         TestData[i][0] = RandomBetween(-1,7);
-        TestData[i][1] = FunctionProblemOneWithNoise(data[i][0]);
+        TestData[i][1] = FunctionProblemOneWithNoise(TrainData[i][0]);
     }
 
     u32 numLayers = 3;
     u32 lSz[3] = {1,25,1};
 #endif
 #if D
-    const char *filename = "../data/nn2b.csv";
+    const char *filename = "nn2b.csv";
         
-    r32 data[DataPointCount][3];
+    r32 TrainData[DataPointCount][3];
     r32 TestData[DataPointCount][3];
     
     for(u32 i = 0;
-        i < ArrayCount(data);
+        i < ArrayCount(TrainData);
         ++i)
     {
-        data[i][0] = RandomBetween(-3,3);
-        data[i][1] = RandomBetween(-3,3);
-        data[i][2] = FunctionProblemTwoWithNoise(data[i][0], data[i][1]);
+        TrainData[i][0] = RandomBetween(-3,3);
+        TrainData[i][1] = RandomBetween(-3,3);
+        TrainData[i][2] = FunctionProblemTwoWithNoise(TrainData[i][0], TrainData[i][1]);
         
-        TestData[i][0] = RandomBetween(-5,5);
-        TestData[i][1] = RandomBetween(-5,5);
-        TestData[i][2] = FunctionProblemTwoWithNoise(data[i][0], data[i][1]);
+        TestData[i][0] = RandomBetween(-3,3);
+        TestData[i][1] = RandomBetween(-3,3);
+        TestData[i][2] = FunctionProblemTwoWithNoise(TrainData[i][0], TrainData[i][1]);
     }
 
     u32 numLayers = 4;
     u32 lSz[4] = {2,25,10,1};
 #endif
 
+    //crash if I missed a number change
     Assert(numLayers == ArrayCount(lSz));
 	
 	r32 beta = 0.3f, alpha = 0.1f;
-	u32 num_iter = 50000;
+	u32 num_iter = 5000000;
 
 	CBackProp *bp = new CBackProp(numLayers, lSz, beta, alpha);
 
     u32 DataPointSize = lSz[0] + lSz[numLayers - 1];
 
+    //iterate up to the max iterations
     for (u32 IterationIndex = 0;
          IterationIndex < num_iter;
          ++IterationIndex)
@@ -208,11 +204,13 @@ s32 main()
             DataPointIndex < DataPointCount;
             ++DataPointIndex)
         {
-            r32 *target = &data[DataPointIndex][lSz[0]];
-            bp->bpgt(data[DataPointIndex], target);
+            //backpropogate the training data and caluculate the mse
+            r32 *target = &TrainData[DataPointIndex][lSz[0]];
+            bp->bpgt(TrainData[DataPointIndex], target);
             MeanSquareError += bp->mse(target);
         }
-        
+
+        //if average of MSE over the set of test data is below the threshold, end training
         MeanSquareError /= DataPointCount;
         if(MeanSquareError < Thresh)
         {
@@ -226,28 +224,46 @@ s32 main()
 	}
 
 #if 1
-    std::ofstream ofs;
-    ofs.open (filename, std::ofstream::out);
 
+    //create ofs to create csvs of the data
+    
+    const char *path_prefix = "../data/";
+    char OutputFilename[80];
+    strcpy_s(OutputFilename, path_prefix);
+    strcat_s(OutputFilename, filename);
+    char TestDataFilename[80];
+    strcpy_s(TestDataFilename, path_prefix);
+    strcat_s(TestDataFilename, "test");
+    strcat_s(TestDataFilename, filename);
+
+    printf("%s\n%s\n", OutputFilename, TestDataFilename);
+    
+    std::ofstream NetworkOutput, TestDataOutput;
+    NetworkOutput.open(OutputFilename, std::ofstream::out);
+    TestDataOutput.open(TestDataFilename, std::ofstream::out);
+
+    //iterate through each test data point, feed forward, and save out the results
 	for (u32 i = 0 ; i < DataPointCount ; i++ )
 	{
-        r32 *DataPoint = data[i];
+        r32 *DataPoint = TestData[i];
 		bp->ffwd(DataPoint);
         r32 output = DataPoint[lSz[0]];
         r32 prediction = bp->Out(0);
-        r32 unNormalized = (prediction * 10) - 5;
+        r32 reNormalized = (prediction * 10) - 5;
 
         for(u32 InputIndex = 0;
             InputIndex < lSz[0];
             ++InputIndex)
         {
-            ofs << DataPoint[InputIndex] << ',';
+            NetworkOutput << DataPoint[InputIndex] << ',';
+            TestDataOutput << DataPoint[InputIndex] << ',';
         }
-        ofs << unNormalized << std::endl;
+        NetworkOutput << reNormalized << std::endl;
+        TestDataOutput << ((output*10)-5) << std::endl;
 	}
 #endif
 
-    ofs.close();
+    NetworkOutput.close();
     
     return 1;
 }
