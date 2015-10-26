@@ -1,16 +1,15 @@
 #if !defined(GA_H)
 
-#define _CRT_RAND_S
-#include "stdlib.h"
 #include <math.h>
 
-#define GenerationCount
+#define MutationRate 0.01
+#define GenerationCount 100
 #define PopulationSize 100
 #define ChromosomeSize 2
 
 struct individual
 {
-    float Chromosome[ChromosomeSize];
+    r32 Chromosome[ChromosomeSize];
 };
 
 struct population
@@ -18,15 +17,11 @@ struct population
     individual Individuals[PopulationSize];
 };
 
-struct genetic_algorithm
+struct individual_fitness
 {
-    population *Population;
-    float MutationRate;
-    u32 Generations;
+    u32 IndividualIndex;
+    r32 FitnessScore;
 };
-
-
-
 
 #define GA_H
 #endif
