@@ -17,6 +17,6 @@ IF %release%==1 (set CompilerFlags= %ReleaseCompilerFlags%)
 IF NOT EXIST bin mkdir bin
 pushd bin
 
-cl %CompilerFlags% ..\Project1\main.cpp /link %CommonLinkerFlags%
+cl %CompilerFlags% ..\Project2\main.cpp /link %CommonLinkerFlags%
 
 popd
