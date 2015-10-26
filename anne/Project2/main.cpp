@@ -29,7 +29,6 @@ internal u32
 LotteryWinner(u32 LotteryEntrantsCount)
 {
     u32 LotteryTicketCount = LotteryEntrantsCount * (LotteryEntrantsCount + 1) / 2;
-    //printf("TicketCount: %d\n", LotteryTicketCount);
 
     u32 ChosenTicket = (u32)(RandomBetween(0, (r32)LotteryTicketCount) + 0.5f);
     ChosenTicket = (ChosenTicket >= LotteryTicketCount) ? LotteryTicketCount-1 : ChosenTicket;
@@ -38,11 +37,13 @@ LotteryWinner(u32 LotteryEntrantsCount)
     u32 TicketIndex = ChosenTicket;
 
     u32 TicketCutoff = PopulationSize;
-    while(TicketIndex >= TicketCutoff--)
+    while(TicketIndex >= TicketCutoff)
     {
         ++WinnerIndex;
-        TicketIndex -= TicketCutoff;
+        TicketIndex -= TicketCutoff--;
     }
+
+    Assert(WinnerIndex >= 0 && WinnerIndex < PopulationSize);
     
     return WinnerIndex;
 }
@@ -73,11 +74,9 @@ PrintArray(individual_fitness *Array, u32 Size)
 }
 
 internal void
-Quicksort(individual_fitness *Array, u32 First, u32 Last)
+Quicksort(individual_fitness *Array, s32 First, s32 Last)
 {
-    printf("start sort\n");
-    
-    u32 Pivot, I, J;
+    s32 Pivot, I, J;
     individual_fitness Temp;
 
     if(First < Last)
@@ -92,7 +91,7 @@ Quicksort(individual_fitness *Array, u32 First, u32 Last)
             {
                 ++I;
             }
-            while(Array[J].FitnessScore < Array[Pivot].FitnessScore)
+            while(J > Pivot && Array[J].FitnessScore <= Array[Pivot].FitnessScore)
             {
                 --J;
             }
@@ -110,10 +109,9 @@ Quicksort(individual_fitness *Array, u32 First, u32 Last)
         Quicksort(Array, First, J-1);
         Quicksort(Array, J+1, Last);
     }
-    
-    printf("end sort\n");
 }
 
+//theoretical max: 1.80738
 internal r32
 FitnessScore(individual *Individual)
 {
@@ -122,11 +120,9 @@ FitnessScore(individual *Individual)
     r32 X = Individual->Chromosome[0];
     r32 Y = Individual->Chromosome[1];
 
-    if (IsBetween(X, -2, 4) && IsBetween(Y, -2, 4))
+    if (IsBetween(X, LowerBound, UpperBound) && IsBetween(Y, LowerBound, UpperBound))
     {
-        Result = atan(X) + atan(Y) + sin(X) + sin(Y);
-
-        printf("x=%f\ny=%f\nresult=%f\n\n", X, Y, Result);
+        Result = (r32)(atan(X) + atan(Y) + sin(X) + sin(Y));
     }
     
     return Result;
@@ -142,8 +138,9 @@ Mutate(individual *Individual)
         r32 Random = RandomBetween(0,1);
         if(Random < MutationRate)
         {
-            r32 Offset = RandomBetween(0,1);
-            Offset = pow(Offset, 5);
+            r32 Offset = RandomBetween(-1,1);
+            Offset = (r32)pow(Offset, 5);
+            Offset *= MutationMagnitude;
             Individual->Chromosome[ChromosomeIndex] += Offset;
         }
     }
@@ -163,11 +160,7 @@ ReproducePopulation(population *Population)
             FitnessScore(&Population->Individuals[IndividualIndex]);
     }
 
-    PrintArray(PopulationFitnessRanked, PopulationSize);
-
     Quicksort(PopulationFitnessRanked, 0, PopulationSize-1);
-
-    PrintArray(PopulationFitnessRanked, PopulationSize);
 
     individual Best = Population->Individuals[PopulationFitnessRanked[0].IndividualIndex];
     printf("Best Individual: (%f, %f)\n", Best.Chromosome[0], Best.Chromosome[1]);
@@ -209,7 +202,11 @@ RandomizePopulation(population *Population)
 
 s32 main()
 {
+#if 1
     srand((u32)time(0));
+#else
+    srand(0);
+#endif
 
     population *Population = (population *)malloc(sizeof(population));
 
@@ -220,7 +217,7 @@ s32 main()
         ++IndividualIndex)
     {
         LINE_BREAK
-        PrintPopulation(Population);
+//        PrintPopulation(Population);
         Population = ReproducePopulation(Population);
     }
 

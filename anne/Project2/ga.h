@@ -2,10 +2,14 @@
 
 #include <math.h>
 
-#define MutationRate 0.01
-#define GenerationCount 1
-#define PopulationSize 10
+#define MutationRate 0.3
+#define MutationMagnitude 10
+#define GenerationCount 1000
+#define PopulationSize 1000
 #define ChromosomeSize 2
+
+#define LowerBound -10
+#define UpperBound 10
 
 struct individual
 {
