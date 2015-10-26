@@ -3,8 +3,8 @@
 #include <math.h>
 
 #define MutationRate 0.01
-#define GenerationCount 100
-#define PopulationSize 100
+#define GenerationCount 1
+#define PopulationSize 10
 #define ChromosomeSize 2
 
 struct individual

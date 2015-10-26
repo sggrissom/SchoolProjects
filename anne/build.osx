@@ -6,4 +6,4 @@ fi
 cd bin
 
 IgnoredWarnings="-Wno-unused-function -Wno-unused-variable"
-g++ ../Project1/main.cpp -Werror -O2 -DINTERNAL -DSLOW $IgnoredWarnings
+g++ ../Project2/main.cpp -Werror -O2 -DINTERNAL -DSLOW $IgnoredWarnings

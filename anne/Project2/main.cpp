@@ -13,6 +13,8 @@
 #include "slib.h"
 #include "ga.h"
 
+#define LINE_BREAK printf("--------\n");
+
 //macro to get a random float between two values
 #define RandomBetween(min,max) (min + (r32)(rand() / ((r32)(RAND_MAX/(max - min)))))
 #define IsBetween(test, min, max) ((test) < (min) ? 0 : ((test) > (max) ? 0 : 1))
@@ -27,7 +29,7 @@ internal u32
 LotteryWinner(u32 LotteryEntrantsCount)
 {
     u32 LotteryTicketCount = LotteryEntrantsCount * (LotteryEntrantsCount + 1) / 2;
-    printf("%d\n", LotteryTicketCount);
+    //printf("TicketCount: %d\n", LotteryTicketCount);
 
     u32 ChosenTicket = (u32)(RandomBetween(0, (r32)LotteryTicketCount) + 0.5f);
     ChosenTicket = (ChosenTicket >= LotteryTicketCount) ? LotteryTicketCount-1 : ChosenTicket;
@@ -57,38 +59,74 @@ PrintPopulation(population *Population)
     }
 }
 
-//bubble sort for ease of implementation
 internal void
-SortFitnesses(individual_fitness *Fitnesses)
+PrintArray(individual_fitness *Array, u32 Size)
 {
-    b32 Swapped = true;
-    
-    for(u32 SortedIndex = 1;
-        SortedIndex < PopulationSize && Swapped;
-        ++SortedIndex)
+    LINE_BREAK
+    for(u32 ArrayIndex = 0;
+        ArrayIndex < Size;
+        ++ArrayIndex)
     {
-        Swapped = false;
-        if(Fitnesses[SortedIndex-1].FitnessScore < Fitnesses[SortedIndex].FitnessScore)
-        {
-            Swap(Fitnesses[SortedIndex-1], Fitnesses[SortedIndex]);
-            Swapped = true;
-        }
+        printf("%f\n", Array[ArrayIndex].FitnessScore);
     }
-
-    printf("%f - %f\n", Fitnesses[0].FitnessScore, Fitnesses[1].FitnessScore);
+    LINE_BREAK
 }
 
-internal float
+internal void
+Quicksort(individual_fitness *Array, u32 First, u32 Last)
+{
+    printf("start sort\n");
+    
+    u32 Pivot, I, J;
+    individual_fitness Temp;
+
+    if(First < Last)
+    {
+        Pivot = First;
+        I = First;
+        J = Last;
+
+        while(I < J)
+        {
+            while(Array[I].FitnessScore >= Array[Pivot].FitnessScore && I < Last)
+            {
+                ++I;
+            }
+            while(Array[J].FitnessScore < Array[Pivot].FitnessScore)
+            {
+                --J;
+            }
+            if(I < J)
+            {
+                Temp = Array[I];
+                Array[I] = Array[J];
+                Array[J] = Temp;
+            }
+        }
+
+        Temp = Array[Pivot];
+        Array[Pivot] = Array[J];
+        Array[J] = Temp;
+        Quicksort(Array, First, J-1);
+        Quicksort(Array, J+1, Last);
+    }
+    
+    printf("end sort\n");
+}
+
+internal r32
 FitnessScore(individual *Individual)
 {
-    float Result = 0;
+    r32 Result = 0;
 
-    float X = Individual->Chromosome[0];
-    float Y = Individual->Chromosome[1];
+    r32 X = Individual->Chromosome[0];
+    r32 Y = Individual->Chromosome[1];
 
     if (IsBetween(X, -2, 4) && IsBetween(Y, -2, 4))
     {
         Result = atan(X) + atan(Y) + sin(X) + sin(Y);
+
+        printf("x=%f\ny=%f\nresult=%f\n\n", X, Y, Result);
     }
     
     return Result;
@@ -125,7 +163,14 @@ ReproducePopulation(population *Population)
             FitnessScore(&Population->Individuals[IndividualIndex]);
     }
 
-    SortFitnesses(PopulationFitnessRanked);
+    PrintArray(PopulationFitnessRanked, PopulationSize);
+
+    Quicksort(PopulationFitnessRanked, 0, PopulationSize-1);
+
+    PrintArray(PopulationFitnessRanked, PopulationSize);
+
+    individual Best = Population->Individuals[PopulationFitnessRanked[0].IndividualIndex];
+    printf("Best Individual: (%f, %f)\n", Best.Chromosome[0], Best.Chromosome[1]);
 
     population *NewPopulation = (population *)malloc(sizeof(population));
 
@@ -174,8 +219,8 @@ s32 main()
         IndividualIndex < GenerationCount;
         ++IndividualIndex)
     {
-        //PrintPopulation(Population);
-        printf("--------\n");
+        LINE_BREAK
+        PrintPopulation(Population);
         Population = ReproducePopulation(Population);
     }
 
